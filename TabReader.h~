@@ -1,0 +1,23 @@
+#ifndef TABREADER_H
+#define TABREADER_H
+
+
+
+class TabReader{
+ private:
+  void readHeader();
+  char* file_version;
+  char* title;
+  char* subtitle;
+  char* interpret;
+  char* album;
+  char* author;
+  char* copyright;
+  char* tab_author;
+  char* instructional;
+ public:
+  TabReader(const char* filename);
+};
+
+
+#endif

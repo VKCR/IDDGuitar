@@ -1,0 +1,124 @@
+#include "TabReader.h"
+#include <iostream>
+#include <stdio.h>
+#include <string.h>
+
+using namespace std;
+
+void read_string(FILE* file, char**buf){
+  char read;
+  read = (char)fgetc(file);
+  *buf = new char[(int)read];
+  fgets(*buf, (int)read+1, file);
+}
+
+void read_null_string(FILE* file){
+  fgetc(file);
+}
+
+int read_int(FILE* file){
+  char read;
+  int result = 0;
+  for (int i=0; i<4; i++){
+    result<<8;
+    read = (char)fgetc(file);
+    result += (int)read;
+  }
+  
+  return result;
+}
+
+TabReader::TabReader(const char* filename){
+  //open the file and check that it opened successfully
+  FILE* file = fopen(filename, "r");
+  if (file==NULL){
+    cout<<"file reading error"<<endl;
+    return;
+  }
+
+  //read the header
+  char read; //character being read
+  
+  //read file version, fixed number of characters so have to cal
+  read = (char)fgetc(file);
+  file_version = new char[30]; //still set size to 30 because we read 30 characters
+  fgets(file_version, 31, file);
+  
+  if(read_int(file)!=1)
+    read_string(file, &title);
+  else
+    read_null_string(file);
+ox
+
+  read_int(file);
+  read_null_string(file);
+  //read_string(file, &subtitle);
+  //cout<<subtitle<<endl;
+  
+  
+  read_int(file);
+  read_string(file, &interpret);
+  cout<<interpret<<endl;
+
+  read_int(file);
+  read_string(file, &album);
+  cout<<album<<endl;
+
+  read_int(file);
+  read_string(file, &author);
+  cout<<author<<endl;
+
+  read_int(file);
+  read_null_string(file);
+
+  read_int(file);
+  read_string(file, &tab_author);
+  cout<<tab_author<<endl;
+
+  cout<<file_version<<endl<<title<<endl<<interpret<<endl<<album<<endl<<author<<endl<<tab_author<<endl;
+  
+  /*
+  //truc = read_int(file);
+  read_string(file, &interpret);
+  cout<<interpret<<endl;
+  
+  //truc = read_int(file);
+  read_string(file, &album);
+  cout<<album<<endl;*/
+  /*read_string(file, &file_version);
+  read_string(file, &title);
+  read_string(file, &subtitle);
+  read_string(file, &interpret);
+  read_string(file, &album);
+  read_string(file, &author);
+  read_string(file, &copyright);
+  read_string(file, &tab_author);
+  read_string(file, &instructional);
+  
+  
+  
+  cout<<file_version<<endl<<title<<endl<<subtitle<<endl<<interpret<<endl<<album<<endl<<author<<endl<<copyright<<endl<<tab_author<<endl<<instructional<<endl;*/
+
+
+  
+  /*while ( (read = (char)fgetc(file)) != (char)EOF){
+    cout<<read<<endl;
+    }*/
+  fclose(file);
+}
+
+
+
+/*
+EMPTY STRING: 9 bytes
+
+
+  - The title of the piece;
+  - The subtitle of the piece;
+  - The interpret of the piece;
+  - The album from which the piece was taken;
+  - The author of the piece;
+  - The copyright;
+  - The name of the author of the tablature;
+  - An 'instructional' line about the tablature.
+*/

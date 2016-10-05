@@ -1,0 +1,9 @@
+#include <iostream>
+#include "TabReader.h"
+
+using namespace std;
+
+int main(){
+  TabReader t("acdc_hell.gp4");
+  return 0;
+}
