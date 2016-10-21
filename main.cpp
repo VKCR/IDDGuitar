@@ -7,10 +7,29 @@
 #include <stdio.h>
 #include <string>
 #include <cmath>
+#include "geometry.h"
+#include <iostream>
+
+using namespace std;
 
 
-/*done for 45 degree and 0 cm, tilted sideways*/
-
+/*int main(){
+  Point a(1.0,2.0);
+  Point b(3.0, 5.0);
+  Vector v(1.0, 2.0);
+  Vector w(0.0,1.0);
+  cout<<a+v<<endl<<b+v<<endl<<v<<endl<<w<<endl<<v*w<<endl;
+  Point c = a+v;
+  cout<<c<<endl;
+  v.Normalize();
+  cout<<v<<endl;
+  Plane source(Point(0,0),Vector(1920,0),Vector(0,1080));
+  Plane dest(Point(100,100), Vector(1000,100), Vector(100,1000));
+  cout<<dest;
+  Point p(100,100);
+  Point q = scalePoint(p, dest, source);
+  cout<<q<<endl;
+  }*/
 
 
 
@@ -175,14 +194,7 @@ int main( int argc, char* args[] )
 
 		  else if( e.type == SDL_KEYDOWN )
                     {
-		      //Select surfaces based on key press
-		      switch( e.key.keysym.sym )
-                        {
-			case SDLK_UP:
-			  quit=true;
-			  break;
-
-                        }
+		      quit = true;
                     }
 		}
 
@@ -190,12 +202,45 @@ int main( int argc, char* args[] )
 	      SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
 	      SDL_RenderClear( gRenderer );
 
-	      //Render red filled quad
-	      SDL_Rect fillRect = { SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
-	      SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0xFF );		
-	      SDL_RenderFillRect( gRenderer, &fillRect );
 
-	      //Render green outlined quad
+	      Point topleft(SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4);
+	      Point topright(3 * SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4);
+	      Point bottomleft(SCREEN_WIDTH / 4, 3 * SCREEN_HEIGHT / 4);
+	      Point bottomright(3 * SCREEN_WIDTH / 4, 3 * SCREEN_HEIGHT / 4);
+
+	      Plane source(Point(0,0),Vector(1920,0),Vector(0,1080));
+	      Plane dest(Point(100,100), Vector(1000,200), Vector(400,800));
+	      
+	      
+	      if(true){
+		topleft = scalePoint(topleft, dest, source);
+		topright = scalePoint(topright, dest, source);
+		bottomleft = scalePoint(bottomleft, dest, source);
+		bottomright = scalePoint(bottomright, dest, source);
+	      }
+
+	      cout<<topleft<<endl<<topright<<endl<<bottomleft<<endl<<bottomright<<endl;
+
+	      SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0xFF, 0xFF );		
+	      SDL_RenderDrawLine( gRenderer, topleft.x, topleft.y, topright.x, topright.y );
+	      SDL_RenderDrawLine( gRenderer, topright.x, topright.y, bottomright.x, bottomright.y );
+	      SDL_RenderDrawLine( gRenderer, bottomright.x, bottomright.y, bottomleft.x, bottomleft.y );
+	      SDL_RenderDrawLine( gRenderer, topleft.x, topleft.y, bottomleft.x, bottomleft.y );
+	      SDL_RenderDrawLine( gRenderer, topleft.x, topleft.y, bottomright.x, bottomright.y );
+	      SDL_RenderDrawLine( gRenderer, bottomleft.x, bottomleft.y, topright.x, topright.y );
+	      
+	      
+
+	      
+	      //Render red filled quad
+	      /* SDL_Rect fillRect = { SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
+	      SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0xFF );		
+	      SDL_RenderFillRect( gRenderer, &fillRect );*/
+
+
+	      
+
+	      /*//Render green outlined quad
 	      SDL_Rect outlineRect = { SCREEN_WIDTH / 6, SCREEN_HEIGHT / 6, SCREEN_WIDTH * 2 / 3, SCREEN_HEIGHT * 2 / 3 };
 	      SDL_SetRenderDrawColor( gRenderer, 0x00, 0xFF, 0x00, 0xFF );		
 	      SDL_RenderDrawRect( gRenderer, &outlineRect );
@@ -209,7 +254,7 @@ int main( int argc, char* args[] )
 	      for( int i = 0; i < SCREEN_HEIGHT; i += 4 )
 		{
 		  SDL_RenderDrawPoint( gRenderer, SCREEN_WIDTH / 2, i );
-		}
+		  }*/
 
 	      //Update screen
 	      SDL_RenderPresent( gRenderer );
@@ -222,3 +267,4 @@ int main( int argc, char* args[] )
 
   return 0;
 }
+
