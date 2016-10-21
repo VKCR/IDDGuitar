@@ -117,11 +117,6 @@ inline ostream& operator<<(ostream& os, const Plane& pl)
 }
 
 //what we need is intersection
-
-//HAVE A WAY TO CONVERT BETWEEN POINTS IN SPACE AND POINT IN A PLANE!!!!
-//create another layer of data abstraction, for 2D drawings, and for 3D points in space
-//structures screenpoint and screen
-//Have a way to get the projected plane from a distance of a source
-//je me complique la vie, il suffirait de faire comme dans SICP, faire un plan defini par deux vecteurs, et puis apres il suffit de determiner la forme du deuxieme truc apres avoir scale 
+//two layers of data abstraction
 
 #endif
