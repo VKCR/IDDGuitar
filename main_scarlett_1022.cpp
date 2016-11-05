@@ -11,14 +11,14 @@
 
 //Using SDL, SDL_image, standard IO, math, and strings
 #include <SDL2/SDL.h>
-#include <SDL_image.h>
+#include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <string>
 #include <cmath>
 
 //Screen dimension constants
-const int SCREEN_WIDTH = 1366;
-const int SCREEN_HEIGHT = 700;
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 1080;
 
 //Starts up SDL and creates window
 bool init();

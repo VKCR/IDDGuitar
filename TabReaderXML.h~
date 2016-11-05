@@ -1,0 +1,14 @@
+//Tab reader module for the project
+//methods which read the tab from an xml file and create a Tab object, which contains the required information of the song
+
+//we need to read the file, parse it, and fill in the Tab data structure
+//tu
+
+class TabReaderXML{
+ private:
+  static void parseTag(char*);
+  static void parseLine(char*);
+  
+ public:
+  static void ReadTab(char* filename, Tab* tab); //function which reads a tab
+};

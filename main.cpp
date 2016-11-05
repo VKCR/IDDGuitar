@@ -1,270 +1,49 @@
-/*This source code copyrighted by Lazy Foo' Productions (2004-2015)
-  and may not be redistributed without written permission.*/
-
-//Using SDL, SDL_image, standard IO, math, and strings
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <string>
 #include <cmath>
-#include "geometry.h"
 #include <iostream>
+#include "TabReaderXML.h"
+
 
 using namespace std;
 
-
-/*int main(){
-  Point a(1.0,2.0);
-  Point b(3.0, 5.0);
-  Vector v(1.0, 2.0);
-  Vector w(0.0,1.0);
-  cout<<a+v<<endl<<b+v<<endl<<v<<endl<<w<<endl<<v*w<<endl;
-  Point c = a+v;
-  cout<<c<<endl;
-  v.Normalize();
-  cout<<v<<endl;
-  Plane source(Point(0,0),Vector(1920,0),Vector(0,1080));
-  Plane dest(Point(100,100), Vector(1000,100), Vector(100,1000));
-  cout<<dest;
-  Point p(100,100);
-  Point q = scalePoint(p, dest, source);
-  cout<<q<<endl;
-  }*/
+//TODO
+//change the privacy settings for the different classes
 
 
-
-//Screen dimension constants
-const int SCREEN_WIDTH = 1920;
-const int SCREEN_HEIGHT = 1080;
-
-//Starts up SDL and creates window
-bool init();
-
-//Loads media
-bool loadMedia();
-
-//Frees media and shuts down SDL
-void close();
-
-//Loads individual image as texture
-SDL_Texture* loadTexture( std::string path );
-
-//The window we'll be rendering to
-SDL_Window* gWindow = NULL;
-
-//The window renderer
-SDL_Renderer* gRenderer = NULL;
-
-bool init()
-{
-  //Initialization flag
-  bool success = true;
-
-  //Initialize SDL
-  if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
-    {
-      printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
-      success = false;
-    }
+int main(int argc, char** argv){
+  Tab tab;
+  if (argc > 1)
+    TabReaderXML::ReadTabXML(argv[1],&tab);
   else
-    {
-      //Set texture filtering to linear
-      if( !SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" ) )
-	{
-	  printf( "Warning: Linear texture filtering not enabled!" );
-	}
+    TabReaderXML::ReadTabXML("eagles.xml",&tab);
 
-      //Create window
-      gWindow = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
-      if( gWindow == NULL )
-	{
-	  printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
-	  success = false;
-	}
-      else
-	{
-	  //Create renderer for window
-	  gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED );
-	  if( gRenderer == NULL )
-	    {
-	      printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
-	      success = false;
-	    }
-	  else
-	    {
-	      //Initialize renderer color
-	      SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+  tab.tracks->print();
 
-	      //Initialize PNG loading
-	      int imgFlags = IMG_INIT_PNG;
-	      if( !( IMG_Init( imgFlags ) & imgFlags ) )
-		{
-		  printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
-		  success = false;
-		}
-	    }
-	}
-    }
-
-  return success;
-}
-
-bool loadMedia()
-{
-  //Loading success flag
-  bool success = true;
-
-  //Nothing to load
-  return success;
-}
-
-void close()
-{
-  //Destroy window	
-  SDL_DestroyRenderer( gRenderer );
-  SDL_DestroyWindow( gWindow );
-  gWindow = NULL;
-  gRenderer = NULL;
-
-  //Quit SDL subsystems
-  IMG_Quit();
-  SDL_Quit();
-}
-
-SDL_Texture* loadTexture( std::string path )
-{
-  //The final texture
-  SDL_Texture* newTexture = NULL;
-
-  //Load image at specified path
-  SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
-  if( loadedSurface == NULL )
-    {
-      printf( "Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError() );
-    }
-  else
-    {
-      //Create texture from surface pixels
-      newTexture = SDL_CreateTextureFromSurface( gRenderer, loadedSurface );
-      if( newTexture == NULL )
-	{
-	  printf( "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
-	}
-
-      //Get rid of old loaded surface
-      SDL_FreeSurface( loadedSurface );
-    }
-
-  return newTexture;
-}
-
-int main( int argc, char* args[] )
-{
-  //Start up SDL and create window
-  if( !init() )
-    {
-      printf( "Failed to initialize!\n" );
-    }
-  else
-    {
-      //Load media
-      if( !loadMedia() )
-	{
-	  printf( "Failed to load media!\n" );
-	}
-      else
-	{	
-	  //Main loop flag
-	  bool quit = false;
-
-	  //Event handler
-	  SDL_Event e;
-
-	  //While application is running
-	  while( !quit )
-	    {
-	      //Handle events on queue
-	      while( SDL_PollEvent( &e ) != 0 )
-		{
-		  //User requests quit
-		  if( e.type == SDL_QUIT )
-		    {
-		      quit = true;
-		    }
-
-		  else if( e.type == SDL_KEYDOWN )
-                    {
-		      quit = true;
-                    }
-		}
-
-	      //Clear screen
-	      SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-	      SDL_RenderClear( gRenderer );
-
-
-	      Point topleft(SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4);
-	      Point topright(3 * SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4);
-	      Point bottomleft(SCREEN_WIDTH / 4, 3 * SCREEN_HEIGHT / 4);
-	      Point bottomright(3 * SCREEN_WIDTH / 4, 3 * SCREEN_HEIGHT / 4);
-
-	      Plane source(Point(0,0),Vector(1920,0),Vector(0,1080));
-	      Plane dest(Point(100,100), Vector(1000,200), Vector(400,800));
-	      
-	      
-	      if(true){
-		topleft = scalePoint(topleft, dest, source);
-		topright = scalePoint(topright, dest, source);
-		bottomleft = scalePoint(bottomleft, dest, source);
-		bottomright = scalePoint(bottomright, dest, source);
-	      }
-
-	      cout<<topleft<<endl<<topright<<endl<<bottomleft<<endl<<bottomright<<endl;
-
-	      SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0xFF, 0xFF );		
-	      SDL_RenderDrawLine( gRenderer, topleft.x, topleft.y, topright.x, topright.y );
-	      SDL_RenderDrawLine( gRenderer, topright.x, topright.y, bottomright.x, bottomright.y );
-	      SDL_RenderDrawLine( gRenderer, bottomright.x, bottomright.y, bottomleft.x, bottomleft.y );
-	      SDL_RenderDrawLine( gRenderer, topleft.x, topleft.y, bottomleft.x, bottomleft.y );
-	      SDL_RenderDrawLine( gRenderer, topleft.x, topleft.y, bottomright.x, bottomright.y );
-	      SDL_RenderDrawLine( gRenderer, bottomleft.x, bottomleft.y, topright.x, topright.y );
-	      
-	      
-
-	      
-	      //Render red filled quad
-	      /* SDL_Rect fillRect = { SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
-	      SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0xFF );		
-	      SDL_RenderFillRect( gRenderer, &fillRect );*/
-
-
-	      
-
-	      /*//Render green outlined quad
-	      SDL_Rect outlineRect = { SCREEN_WIDTH / 6, SCREEN_HEIGHT / 6, SCREEN_WIDTH * 2 / 3, SCREEN_HEIGHT * 2 / 3 };
-	      SDL_SetRenderDrawColor( gRenderer, 0x00, 0xFF, 0x00, 0xFF );		
-	      SDL_RenderDrawRect( gRenderer, &outlineRect );
-				
-	      //Draw blue horizontal line
-	      SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0xFF, 0xFF );		
-	      SDL_RenderDrawLine( gRenderer, 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2 );
-
-	      //Draw vertical line of yellow dots
-	      SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0x00, 0xFF );
-	      for( int i = 0; i < SCREEN_HEIGHT; i += 4 )
-		{
-		  SDL_RenderDrawPoint( gRenderer, SCREEN_WIDTH / 2, i );
-		  }*/
-
-	      //Update screen
-	      SDL_RenderPresent( gRenderer );
-	    }
-	}
-    }
-
-  //Free resources and close SDL
-  close();
-
+  tab.tracks->getTail()->getHead()->measures->print();
+  
   return 0;
 }
 
+
+
+/* Code organization
+Different modules :
+-UI module 
+--- for the ui, maybe have the screen follow the tablature
+--- the idea is to select what parts of the song to play
+-Creator of the song data structure module (for now parse the xml file format)
+--- this data is basically a list of packets of notes.
+--- it should be possible to select only a few of the packets each time. For example to play some measure over and over again
+-Communicator module with the microcontroller
+--- transfer a packet of notes to play, and some additional parameters
+--- "killswitch"
+--- general communications features
+
+For the microcontroller:
+-talker with the computer/app
+-listening loop 
+-it just receives data packets and executes them
+-if it receives a kill command it interrupts
+
+ */
