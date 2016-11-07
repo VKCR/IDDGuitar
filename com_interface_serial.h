@@ -23,6 +23,8 @@ class com_interface_serial : public com_interface{
   com_interface_serial(const char*);
   void Stream(Track*, int, int);
   void Stop();
+  void Start();
+  void ReadInfinity();
 };
 
 #endif

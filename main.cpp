@@ -39,110 +39,12 @@ FOR THE ARDUINO:
 
 
 
-//test function//
-Measure* String2Measure(char* buf){
-  char tbuf[50];
-  int oldindex = 1;
-  int index = 1;
-  
-  //get the measure number
-  while(buf[index] != ';')
-    index++;
-  memcpy(tbuf, &buf[oldindex], index-oldindex);
-  tbuf[index-oldindex] = 0;
-  
-  Measure *m = new Measure(atoi(tbuf));
-  index++;
-  oldindex = index;
-  //get the measure tempo
-  while(buf[index] != ';')
-    index++;
-  memcpy(tbuf, &buf[oldindex], index-oldindex);
-  tbuf[index-oldindex] = 0;
-  
-  m->setTempo(atoi(tbuf));
-  index++;
-  oldindex = index;
 
-  bool in_chord = false;
-  bool in_note = false;
-
-  int note_fret;
-  int note_string;
-  bool note_rest;
-  LinkedList<Chord>* chords = NULL;
-  bool end = true;
-  while(end){
-    char c = buf[index];
-    cout<<c<<endl;
-    switch(c){
-    case '{':
-      if(!in_chord){
-	in_chord = true;
-	index++;
-	oldindex = index;
-      }
-      else if(!in_note){
-	in_note = true;
-	index++;
-	oldindex = index;
-      }
-      break; //no other cases
-      
-    case '}':
-      if(in_note){ //end of the note
-	memcpy(tbuf, &buf[oldindex], 2);
-	tbuf[2] = 0;
-	note_fret = atoi(tbuf);
-	memcpy(tbuf, &buf[oldindex+2], 1);
-	tbuf[1] = 0;
-	note_string = atoi(tbuf);
-	memcpy(tbuf, &buf[oldindex+3], 1);
-	tbuf[1] = 0;
-	note_rest = (bool)atoi(tbuf);
-	chords->getLast();
-	if(chords->getLast()->notes == NULL){
-	  chords->getLast()->notes = new LinkedList<Note>(new Note(note_fret, note_string, note_rest),NULL);
-	}
-	else
-	  chords->getLast()->notes->append(new Note(note_fret, note_string, note_rest));
-
-	index++;
-	oldindex = index;
-	in_note = false;
-      }
-      else if(in_chord){
-	in_chord = false;
-	index++;
-	oldindex = index;
-      }
-      else{ //this is the end of the measure
-	cout<<"this is the end"<<endl;
-	end = false;
-      }
-      break;
-      
-    case ';': //end of the duration
-      memcpy(tbuf, &buf[oldindex], index-oldindex);
-      tbuf[index-oldindex] = 0;
-      if (chords == NULL)
-	chords = new LinkedList<Chord>(new Chord(atoi(tbuf)),NULL);
-      else
-	chords->append(new Chord(atoi(tbuf)));
-      
-      index++;
-      oldindex = index;
-      break;
-    default:
-      index++;
-    }
-    
-  }
-  m->chords = chords;
-  return m;
-}
-
-
+//TODO
+//DO A SET TEMPO PACKET
+//bug: first chord is much too long V SOVLED IT WAS DUE TO THE STOP PACKET
+//some bugs : sometimes the initial transaction fails. Might be a serial connection bug more than a bug in my code, as it's non deterministic...
+//Solder the lasers because it sucks dick right now.
 
 int main(int argc, char** argv){
   Tab tab;
@@ -160,8 +62,17 @@ int main(int argc, char** argv){
   //tab.tracks->getTail()->getHead()->measures->print();
   com_interface* COM;
   COM = new com_interface_serial();
-  COM->Stream(tab.tracks->getTail()->getHead(), 1, 50);
-  COM->Stop();
+  int m1 = 1;
+  int m2 = 5;
+  if (argc > 2){
+    m1 = atoi(argv[2]);
+    m2 = atoi(argv[3]);
+  }
+  
+  COM->Stream(tab.tracks->get("P7"), 105, 114);
+  COM->Start();
+  //COM->Stop();
+  COM->ReadInfinity();
   return 0;
 }
 

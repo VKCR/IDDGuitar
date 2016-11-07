@@ -29,6 +29,7 @@ com_interface_serial::com_interface_serial(const char* serial_port){
 //push a text on the serial controller
 //IMPROVEMENTS COULD BE DONE ON THE ACK SYSTEM
 void com_interface_serial::publish(const char* s){
+  cout<<"publishing : "<<s<<endl;
   if(strlen(s)<10000){
     write(serial_controller, s, strlen(s)*sizeof(char));
     while(ACKed == false)
@@ -71,6 +72,12 @@ void com_interface_serial::RecvMSG(){
   }
 }
 
+void com_interface_serial::ReadInfinity(){
+  cout<<"reading"<<endl;
+  while(1)
+    RecvMSG();
+}
+
 void com_interface_serial::DispatchMSG(char* msg){
   int m = -1;
   cout<<"Received msg : "<<msg<<endl;
@@ -109,11 +116,15 @@ void com_interface_serial::Stream(Track* t, int m1, int m2){
 
   int sent = mlist->getHead()->getNumber();
   lastOKed = mlist->getHead()->getNumber();
-  
+  //cout<<"publishing size"<<endl;
+  publish("SIZE");
+  sprintf(measurebuf, "%d", m2-m1+1); 
+  publish(measurebuf);
+  //cout<<"published size"<<endl;
   //now for each measure until the end measure is reached
   while(mlist->getHead()->getNumber() != m2+1){
-    if (sent-lastOKed < 5){
-      cout<<"Publishing measure : "<<mlist->getHead()->getNumber()<<endl;
+    if (1){//sent-lastOKed < 5){ //remove this
+      //cout<<"Publishing measure : "<<mlist->getHead()->getNumber()<<endl;
       Measure2String(mlist->getHead(), measurebuf);
       publish(measurebuf);
       sent++;
@@ -126,10 +137,14 @@ void com_interface_serial::Stream(Track* t, int m1, int m2){
       OKed = false; 
     }
   }
+  
 }
 
 //transfer the order to stop
 void com_interface_serial::Stop(){
-  publish("{STOP}");
+  publish("STOP");
 }
 
+void com_interface_serial::Start(){
+  publish("START");
+}

@@ -15,7 +15,7 @@ void com_interface::Track2String(Track* track, char* b){
   trackstring+=track->getInstrumentName();
   trackstring+=";";
   trackstring+=track->getPartName();
-  trackstring+=";";
+  trackstring+=";"; 
    
   mlist = track->measures;
   
