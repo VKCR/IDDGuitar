@@ -38,6 +38,113 @@ FOR THE ARDUINO:
 ***/
 
 
+
+//test function//
+Measure* String2Measure(char* buf){
+  char tbuf[50];
+  int oldindex = 1;
+  int index = 1;
+  
+  //get the measure number
+  while(buf[index] != ';')
+    index++;
+  memcpy(tbuf, &buf[oldindex], index-oldindex);
+  tbuf[index-oldindex] = 0;
+  
+  Measure *m = new Measure(atoi(tbuf));
+  index++;
+  oldindex = index;
+  //get the measure tempo
+  while(buf[index] != ';')
+    index++;
+  memcpy(tbuf, &buf[oldindex], index-oldindex);
+  tbuf[index-oldindex] = 0;
+  
+  m->setTempo(atoi(tbuf));
+  index++;
+  oldindex = index;
+
+  bool in_chord = false;
+  bool in_note = false;
+
+  int note_fret;
+  int note_string;
+  bool note_rest;
+  LinkedList<Chord>* chords = NULL;
+  bool end = true;
+  while(end){
+    char c = buf[index];
+    cout<<c<<endl;
+    switch(c){
+    case '{':
+      if(!in_chord){
+	in_chord = true;
+	index++;
+	oldindex = index;
+      }
+      else if(!in_note){
+	in_note = true;
+	index++;
+	oldindex = index;
+      }
+      break; //no other cases
+      
+    case '}':
+      if(in_note){ //end of the note
+	char ttbuf[3];
+	memcpy(ttbuf, &buf[oldindex], 2);
+	ttbuf[2] = 0;
+	note_fret = atoi(ttbuf);
+	memcpy(ttbuf, &buf[oldindex+2], 1);
+	ttbuf[1] = 0;
+	note_string = atoi(ttbuf);
+	memcpy(ttbuf, &buf[oldindex+3], 1);
+	ttbuf[1] = 0;
+	note_rest = (bool)atoi(ttbuf);
+	chords->getLast();
+	if(chords->getLast()->notes == NULL){
+	  chords->getLast()->notes = new LinkedList<Note>(new Note(note_fret, note_string, note_rest),NULL);
+	}
+	else
+	  chords->getLast()->notes->append(new Note(note_fret, note_string, note_rest));
+
+	index++;
+	oldindex = index;
+	in_note = false;
+      }
+      else if(in_chord){
+	in_chord = false;
+	index++;
+	oldindex = index;
+      }
+      else{ //this is the end of the measure
+	cout<<"this is the end"<<endl;
+	end = false;
+      }
+      break;
+      
+    case ';': //end of the duration
+      memcpy(tbuf, &buf[oldindex], index-oldindex);
+      tbuf[index-oldindex] = 0;
+      if (chords == NULL)
+	chords = new LinkedList<Chord>(new Chord(atoi(tbuf)),NULL);
+      else
+	chords->append(new Chord(atoi(tbuf)));
+      
+      index++;
+      oldindex = index;
+      break;
+    default:
+      index++;
+    }
+    
+  }
+  m->chords = chords;
+  return m;
+}
+
+
+
 int main(int argc, char** argv){
   Tab tab;
   char* filename;
@@ -53,11 +160,16 @@ int main(int argc, char** argv){
 
   //tab.tracks->getTail()->getHead()->measures->print();
   com_interface* COM;
-  COM = new com_interface_serial();
-  COM->Stream(tab.tracks->getTail()->getHead(), 1, 20);
-  COM->Stop();
-  //COM.TransferTrack(tab.tracks->getTail()->getHead());
-  //COM.TransferMeasureInfo(5,10);
+  COM = new com_interface();
+  char buff[1000];
+  COM->Measure2String(tab.tracks->getTail()->getHead()->measures->getHead(),buff);
+  Measure* m = String2Measure(buff);
+  m->print();
+  m->chords->print();
+  cout<<endl<<endl;
+  tab.tracks->getTail()->getHead()->measures->getHead()->chords->print();
+  //COM->Stream(tab.tracks->getTail()->getHead(), 1, 20);
+  //COM->Stop();
   return 0;
 }
 
