@@ -12,6 +12,10 @@ class com_interface_serial : public com_interface{
  private:
   int serial_controller;
   void publish(const char*);
+  bool ACKed = false;
+  bool OKed = false;
+  int lastOKed = 0;
+  void RecvMSG();
  public:
   com_interface_serial();
   com_interface_serial(const char*);

@@ -7,7 +7,7 @@
 using namespace std;
 
 
-void com_interface::Track2String(Track* track, char** b){
+void com_interface::Track2String(Track* track, char* b){
   LinkedList<Measure>* mlist = track->measures;
   string trackstring = "{";
   trackstring+=track->getID();
@@ -64,12 +64,11 @@ void com_interface::Track2String(Track* track, char** b){
     mlist = mlist->getTail();
   }
   trackstring+="}";
-  *b = new char[trackstring.length()];
-  strcpy(*b, trackstring.c_str());
-  cout<<*b<<endl;
+  strcpy(b, trackstring.c_str());
+  cout<<b<<endl;
 }
 
-void com_interface::Measure2String(Measure* m, char**b){
+void com_interface::Measure2String(Measure* m, char*b){
   string trackstring = "";
   
   trackstring+= "{";
@@ -113,8 +112,7 @@ void com_interface::Measure2String(Measure* m, char**b){
     clist = clist->getTail();
   }
   trackstring+="}";
-  *b = new char[trackstring.length()];
-  strcpy(*b, trackstring.c_str());
-  cout<<*b<<endl;
+  strcpy(b, trackstring.c_str());
+  cout<<b<<endl;
 }
 
