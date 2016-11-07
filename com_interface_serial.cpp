@@ -61,15 +61,38 @@ void com_interface_serial::RecvMSG(){
   cout<<"reading"<<endl;
   char ACKbuff[100];
   read(serial_controller, ACKbuff, sizeof(ACKbuff));
-  if (!strcmp(ACKbuff, "ACK")){
-    ACKed = true;
+  char *token;
+  char s[2] = "\n";
+
+  token = strtok(ACKbuff, s);
+  while( token != NULL ){
+    DispatchMSG(token);
+    token = strtok(NULL, s);
   }
-  else if(ACKbuff[0] == 'O' && ACKbuff[1] == 'K'){
+}
+
+void com_interface_serial::DispatchMSG(char* msg){
+  int m = -1;
+  cout<<"Received msg : "<<msg<<endl;
+  
+  if (msg[0] == 'A' && msg[1] == 'C' && msg[2] == 'K'){//!strcmp(msg, "ACK")){
+    m = ACK;
+  }
+  else if(msg[0] == 'O' && msg[1] == 'K'){
+    m = OK;
+  }
+  
+  switch(m){
+  case ACK:
+    ACKed = true;
+    break;
+  case OK:
     OKed = true;
-    int l = strlen(ACKbuff) - 2;
-    memcpy(ACKbuff, &ACKbuff[2], l);
-    ACKbuff[l] = 0;
-    lastOKed = atoi(ACKbuff) ;
+    int l = strlen(msg) - 2;
+    memcpy(msg, &msg[2], l);
+    msg[l] = 0;
+    lastOKed = atoi(msg);
+    break;
   }
 }
 

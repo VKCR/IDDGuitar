@@ -91,16 +91,15 @@ Measure* String2Measure(char* buf){
       
     case '}':
       if(in_note){ //end of the note
-	char ttbuf[3];
-	memcpy(ttbuf, &buf[oldindex], 2);
-	ttbuf[2] = 0;
-	note_fret = atoi(ttbuf);
-	memcpy(ttbuf, &buf[oldindex+2], 1);
-	ttbuf[1] = 0;
-	note_string = atoi(ttbuf);
-	memcpy(ttbuf, &buf[oldindex+3], 1);
-	ttbuf[1] = 0;
-	note_rest = (bool)atoi(ttbuf);
+	memcpy(tbuf, &buf[oldindex], 2);
+	tbuf[2] = 0;
+	note_fret = atoi(tbuf);
+	memcpy(tbuf, &buf[oldindex+2], 1);
+	tbuf[1] = 0;
+	note_string = atoi(tbuf);
+	memcpy(tbuf, &buf[oldindex+3], 1);
+	tbuf[1] = 0;
+	note_rest = (bool)atoi(tbuf);
 	chords->getLast();
 	if(chords->getLast()->notes == NULL){
 	  chords->getLast()->notes = new LinkedList<Note>(new Note(note_fret, note_string, note_rest),NULL);
@@ -160,16 +159,9 @@ int main(int argc, char** argv){
 
   //tab.tracks->getTail()->getHead()->measures->print();
   com_interface* COM;
-  COM = new com_interface();
-  char buff[1000];
-  COM->Measure2String(tab.tracks->getTail()->getHead()->measures->getHead(),buff);
-  Measure* m = String2Measure(buff);
-  m->print();
-  m->chords->print();
-  cout<<endl<<endl;
-  tab.tracks->getTail()->getHead()->measures->getHead()->chords->print();
-  //COM->Stream(tab.tracks->getTail()->getHead(), 1, 20);
-  //COM->Stop();
+  COM = new com_interface_serial();
+  COM->Stream(tab.tracks->getTail()->getHead(), 1, 50);
+  COM->Stop();
   return 0;
 }
 

@@ -16,6 +16,8 @@ class com_interface_serial : public com_interface{
   bool OKed = false;
   int lastOKed = 0;
   void RecvMSG();
+  void DispatchMSG(char*);
+  enum MSG {ACK, OK};
  public:
   com_interface_serial();
   com_interface_serial(const char*);
