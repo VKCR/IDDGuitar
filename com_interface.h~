@@ -1,0 +1,17 @@
+#ifndef COM_INTERFACE_H
+#define COM_INTERFACE_H
+
+#include <iostream>
+#include "Tab.h"
+using namespace std;
+
+class com_interface{
+ public:
+  com_interface(){};
+  virtual void TransferTrack(Track*){cout<<"Not yet implemented"<<endl;}
+  virtual void TransferMeasureInfo(int,int){cout<<"Not yet implemented"<<endl;}
+  virtual void Play(){cout<<"Not yet implemented"<<endl;}
+  virtual void Stop(){cout<<"Not yet implemented"<<endl;}
+};
+
+#endif

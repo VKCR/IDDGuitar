@@ -1,0 +1,25 @@
+#ifndef COM_INTERFACE_SERIAL_H
+#define COM_INTERFACE_SERIAL_H
+
+#include <fcntl.h>
+#include <unistd.h>
+#include "com_interface.h"
+#include "Tab.h"
+
+
+
+class com_interface_serial : public com_interface{
+ private:
+  int serial_controller;
+  void publish(const char*);
+  void Track2string(Track*, char**);
+ public:
+  com_interface_serial();
+  com_interface_serial(const char*);
+  void TransferTrack(Track*);
+  void TransferMeasureInfo(int,int);
+  void Play();
+  void Stop();
+};
+
+#endif

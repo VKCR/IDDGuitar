@@ -118,5 +118,7 @@ inline ostream& operator<<(ostream& os, const Plane& pl)
 
 //what we need is intersection
 //two layers of data abstraction
+//one layer of data abstraction which is 3d geometry
+//on layer of data abstraction for 2d manipulation
 
 #endif

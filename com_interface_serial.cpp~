@@ -1,0 +1,234 @@
+#include <iostream>
+#include <string.h>
+#include <string>
+#include <stdlib.h>
+#include "com_interface_serial.h"
+
+
+using namespace std;
+
+//initialize the serial connection 
+com_interface_serial::com_interface_serial(){  
+  serial_controller = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
+  if (serial_controller == -1){
+    /* Could not open the port. */
+    cout<<"open_port: Unable to open /dev/ttyACM0 - "<<endl;
+    exit(0);
+  }
+}
+
+com_interface_serial::com_interface_serial(const char* serial_port){  
+  serial_controller = open(serial_port, O_RDWR | O_NOCTTY);
+  if (serial_controller == -1){
+    /* Could not open the port. */
+    cout<<"open_port: Unable to open "<<serial_port<<endl;
+    exit(0);
+  }
+}
+
+//push a text on the serial controller
+//IMPROVEMENTS COULD BE DONE ON THE ACK SYSTEM
+void com_interface_serial::publish(const char* s){
+
+  char ACKbuff[100];
+  
+  if(strlen(s)<10000){
+    write(serial_controller, s, strlen(s)*sizeof(char));
+    read(serial_controller, ACKbuff, sizeof(ACKbuff));
+    cout<<ACKbuff<<endl;
+  }
+  else{ //we have to segment the array
+    int size = strlen(s);
+    int index = 0;
+    char sendbuf[10001];
+    while (size != 0){ //check that this works lol
+      memcpy(sendbuf, &s[index*10000], (10000 < size ? 10000 : size));
+      10000 < size ? sendbuf[10000] = 0 : sendbuf[size] = 0;
+      
+      write(serial_controller, s, strlen(sendbuf)*sizeof(char));
+
+      10000 < size ? size-=10000 : size=0;
+
+      read(serial_controller, ACKbuff, sizeof(ACKbuff));
+      cout<<ACKbuff<<endl;
+    }
+    
+  }
+}
+
+void com_interface_serial::Track2string(Track* track, char** b){
+  LinkedList<Measure>* mlist = track->measures;
+  string trackstring = "{";
+  trackstring+=track->getID();
+  trackstring+=";";
+  trackstring+=track->getInstrumentName();
+  trackstring+=";";
+  trackstring+=track->getPartName();
+  trackstring+=";";
+   
+  mlist = track->measures;
+  
+  while(mlist!=NULL){
+    trackstring+= "{";
+    trackstring+=to_string(mlist->getHead()->getNumber());
+    trackstring+=";";
+    trackstring+=to_string(mlist->getHead()->getTempo());
+    trackstring+=";";
+    LinkedList<Chord>* clist = mlist->getHead()->chords;
+    
+    while (clist!=NULL){
+      trackstring+="{";
+      trackstring+=to_string(clist->getHead()->getDuration());
+      trackstring+=";";
+      LinkedList<Note>* nlist = clist->getHead()->notes;
+      
+      while (nlist!=NULL){
+	trackstring+="{";
+	char tbuf[2];
+	sprintf(tbuf, "%d", nlist->getHead()->getFret());
+	if(nlist->getHead()->getFret() < 10){
+	  trackstring += "0";
+	  trackstring += tbuf[0];
+	}
+	else{
+	  trackstring+= tbuf;
+	}
+	
+	sprintf(tbuf, "%d", nlist->getHead()->getString());
+	trackstring+=tbuf[0];
+	
+	if (nlist->getHead()->getRest())
+	  trackstring += "1";
+	else
+	  trackstring += "0";
+	
+	trackstring+="}";
+	
+	nlist = nlist->getTail();
+      }
+      trackstring+="}";
+      clist = clist->getTail();
+    }
+    trackstring+="}";
+    mlist = mlist->getTail();
+  }
+  trackstring+="}";
+  *b = new char[trackstring.length()];
+  strcpy(*b, trackstring.c_str());
+  cout<<*b<<endl;
+}
+
+//old version
+
+/*void com_interface_serial::Track2string(Track* track, char** b){
+  int totalsize = 0;
+  LinkedList<Measure>* mlist = track->measures;
+
+  while(mlist!=NULL){
+    LinkedList<Chord>* clist = mlist->getHead()->chords;
+    while (clist!=NULL){
+      LinkedList<Note>* nlist = clist->getHead()->notes;
+      while (nlist!=NULL){
+	totalsize+=6;
+	nlist = nlist->getTail();
+      }
+      totalsize+=2;
+      clist = clist->getTail();
+    }
+    totalsize+=2;
+    mlist = mlist->getTail();
+  }
+  *b = new char[totalsize];
+  char *buf = *b;
+  int index = 0;
+  mlist = track->measures;
+  
+  while(mlist!=NULL){
+    buf[index] = '{';
+    index++;
+    LinkedList<Chord>* clist = mlist->getHead()->chords;
+    
+    while (clist!=NULL){
+      buf[index] = '{';
+      index++;
+      LinkedList<Note>* nlist = clist->getHead()->notes;
+      
+      while (nlist!=NULL){
+	buf[index] = '{';
+	index++;
+	char tbuf[2];
+	sprintf(tbuf, "%d", nlist->getHead()->fret);
+	if(nlist->getHead()->fret < 10){
+	  buf[index] = '0';
+	  buf[index+1] = tbuf[0];
+	}
+	else{
+	  buf[index] = tbuf[0];
+	  buf[index+1] = tbuf[1];
+	}
+	index+=2;
+	
+	sprintf(tbuf, "%d", nlist->getHead()->string);
+	buf[index] = tbuf[0];
+	index++;
+	
+	if (nlist->getHead()->rest)
+	  buf[index] = '1';
+	else
+	  buf[index] = '0';
+	index++;
+
+	buf[index] = '}';
+	index++;
+	
+	nlist = nlist->getTail();
+      }
+      buf[index] = '}';
+      index++;
+      
+      clist = clist->getTail();
+    }
+    buf[index] = '}';
+    index++;
+    
+    mlist = mlist->getTail();
+  }
+  cout<<*b<<endl;
+  }*/
+
+//transfer a track
+void com_interface_serial::TransferTrack(Track* track)
+{
+  char* buf;
+  Track2string(track, &buf);
+  cout<<"sending of length "<<strlen(buf)<<endl;
+  publish("TRACK");
+  publish(buf);
+  publish("ENDTRACK"); //wtf pourquoi ya un 2 qui apparait?? BUG BIZARRE
+}
+
+
+//transfer the start and stop measures of the thing to play
+void com_interface_serial::TransferMeasureInfo(int m1, int m2){
+  cout<<"sending from measure "<<m1<<" to "<<m2<<endl;
+  publish("MEASURE");
+  char buf[100];
+  char tbuf[49];
+  sprintf(tbuf, "%d", m1);
+  strcpy(buf,tbuf);
+  sprintf(tbuf, "%d", m2);
+  strcat(buf,";");
+  strcat(buf,tbuf);
+  publish(buf);
+  publish("ENDMEASURE");
+}
+
+//transfer the order to play
+void com_interface_serial::Play(){
+  publish("PLAY");
+}
+
+//transfer the order to stop
+void com_interface_serial::Stop(){
+  publish("STOP");
+}

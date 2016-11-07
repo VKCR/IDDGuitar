@@ -1,18 +1,3 @@
-//Tab module of the project
-//Contains a data structure for the Tab.
-//Data structure is: list of tracks
-//each track has some info, and has a list of measures
-//Each measure has some info, and has a list of notes/chords/frets/whatevs
-//Actually has a list of list of notes: because at some point chords might be played
-//Must have easy access to measures.
-//Like you read just a measure
-//We only care about
-//<note>
-//<fret>
-//<string>
-//everything else is irrelevant
-//Detect if there is a <rest>
-//<chord/> element to indicate chord
 #ifndef TAB_H
 #define TAB_H
 #include <iostream>
@@ -45,6 +30,15 @@ template <class T> class LinkedList
       t->head->print();
       t = t->tail;
     }
+  }
+  int size(){
+    int i = 0;
+    LinkedList<T>* t = this;
+    while (t != NULL){
+      i++;
+      t = t->tail;
+    }
+    return i;
   }
 };
 
@@ -81,13 +75,13 @@ template <class T> T* LinkedList<T>::get(char*id){
 
 
 //NOTE STRUCTURE
-//change the privacy settings
 class Note
 {
- public:
+ private:
   int fret;
   int string;
   bool rest;
+ public:
   Note(){fret = 0; string = 0; rest = false;}
   Note(int f, int s, bool r){fret = f; string = s; rest = r;}
   void print(){
@@ -96,13 +90,18 @@ class Note
     else
       cout<<"Rest"<<endl;
   }
+  int getFret(){return fret;}
+  int getString(){return string;}
+  bool getRest(){return rest;}
+    
 };
 
 class Chord
 {
+ private:
+  int duration;
  public:
   LinkedList<Note>* notes;
-  int duration;
   Chord(int);
   void print(){
     LinkedList<Note>* t = notes;
@@ -112,22 +111,27 @@ class Chord
       t = t->getTail();
     }
   }
+  int getDuration(){return duration;}
 };
 
 class Measure{
  private:
   int number;
+  int tempo;
  public:
   Measure(int);
   LinkedList<Chord>* chords;
   void print(){
     LinkedList<Chord>* t = chords;
-    cout<<"Measure "<<number<<" : "<<endl;
+    cout<<"Measure "<<number<<" of Tempo : "<<tempo<<endl;
     while (t != NULL){
       t->getHead()->print();
       t = t->getTail();
     }
   }
+  int getNumber(){return number;}
+  int getTempo(){return tempo;}
+  void setTempo(int t){tempo = t;}
   
 };
 
@@ -145,6 +149,8 @@ class Track{
   void setInstrumentName(char*);
   void setPartName(char*);
   char* getID(){return id;}
+  char* getInstrumentName(){return instrument_name;}
+  char* getPartName(){return part_name;}
   void print(){
     cout<<"ID : "<<id<<" | Instrument name : "<<instrument_name<<" | Part name : "<<part_name<<endl;
   }

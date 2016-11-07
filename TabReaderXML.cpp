@@ -43,6 +43,8 @@ int TabReaderXML::parseTagType(LineXML* lineXML){
     return CHORD;
   if(!strcmp(type,"/note"))
     return END_NOTE;
+  if(!strcmp(type,"sound"))
+    return SOUND;
   
   
   return UNDEFINED;
@@ -87,6 +89,8 @@ void TabReaderXML::parseTagArgs(LineXML* lineXML, char* arg_buff, int type_arg){
     strcpy(arg_buff, dataArg);
   else if(!strcmp(typeArg, "number") && type_arg == NUMBER)
     strcpy(arg_buff, dataArg);
+  else if(!strcmp(typeArg, "tempo") && type_arg == TEMPO)
+    strcpy(arg_buff, dataArg);
   else
     strcpy(arg_buff, "");
 
@@ -107,9 +111,12 @@ void TabReaderXML::ReadTabXML(const char* filename, Tab* tab)
   char line[200]; //current line buffer from the file
   char arg[200]; //array to get args results
   LineXML lineXML; //current parsed XML line
-  Note note; //current note info
+  int note_fret = 0; //current note info
+  int note_string = 0;
+  bool note_rest = false;
   int chord_duration = 0; //current chord duration info;
   bool in_chord = false; //if the note is in the current chord
+  int tempo = 0;
   //TrackList* currTrack = NULL;
   Track* currTrack = NULL; //pointer to current track
   Measure* currMeasure = NULL; //pointer to current measure
@@ -130,26 +137,21 @@ void TabReaderXML::ReadTabXML(const char* filename, Tab* tab)
       break;
     case SCORE_PART:
       parseTagArgs(&lineXML, arg, ID);
-      //tab->tracks = new LinkedList<Track>(new Track(arg), tab->tracks);
       if(tab->tracks == NULL)
 	tab->tracks = new LinkedList<Track>(new Track(arg), NULL);
       else
 	tab->tracks->append(new Track(arg));
-      //tab->tracks = new TrackList(new Track(id), tab->tracks);
       break;
     case INSTRUMENT_NAME:
       tab->tracks->getLast()->setInstrumentName(lineXML.center);
-      //tab->tracks->getHead()->setInstrumentName(lineXML.center);
       break;
     case PART_NAME:
-      //tab->tracks->getHead()->setPartName(lineXML.center);
       tab->tracks->getLast()->setPartName(lineXML.center);
       break;
 
     case PART:
       parseTagArgs(&lineXML, arg, ID);
       currTrack = tab->tracks->get(arg);
-      //currMeasure = currTrack->getHead()->measures;
       break;
 
     case MEASURE:
@@ -160,17 +162,15 @@ void TabReaderXML::ReadTabXML(const char* filename, Tab* tab)
       }
       else
 	currMeasure = currTrack->measures->append(new Measure(atoi(arg)));
-      //currTrack->getHead()->measures = new LinkedList<Measure>(new Measure(atoi(arg)),currTrack->getHead()->measures);
-      //currMeasure = currTrack->getHead()->measures;
-      //currChord = currMeasure->getHead()->chords;
+      currMeasure->setTempo(tempo); //set the tempo
       break;
 
     case FRET: //keep info about the last read note fret
-      note.fret = atoi(lineXML.center);
+      note_fret = atoi(lineXML.center);
       break;
 
     case STRING: //keep info about the last read note string
-      note.string = atoi(lineXML.center);
+      note_string = atoi(lineXML.center);
       break;
 
     case DURATION: //keep info about the last read note duration
@@ -178,7 +178,7 @@ void TabReaderXML::ReadTabXML(const char* filename, Tab* tab)
       break;
 
     case REST: //trigger the rest flag
-      note.rest = true;
+      note_rest = true;
       break;
      
     case CHORD: //trigger the chord flag
@@ -193,27 +193,25 @@ void TabReaderXML::ReadTabXML(const char* filename, Tab* tab)
 	}
 	else
 	  currChord = currMeasure->chords->append(new Chord(chord_duration));
-	//currMeasure->getHead()->chords = new LinkedList<Chord>(new Chord(chord_duration),currMeasure->getHead()->chords);
-	//currChord = currMeasure->getHead()->chords;
       } 
       //add the note
       if(currChord->notes == NULL)
-	currChord->notes = new LinkedList<Note>(new Note(note.fret,note.string,note.rest),NULL);
+	currChord->notes = new LinkedList<Note>(new Note(note_fret,note_string,note_rest),NULL);
       else
-	currChord->notes->append(new Note(note.fret,note.string,note.rest));
-	/*
-      if (note.rest)
-	//currChord->getHead()->notes = new LinkedList<Note>(new Note(0,0,true), currChord->getHead()->notes);
-	currChord->notes->append
-      else
-      currChord->getHead()->notes = new LinkedList<Note>(new Note(note.fret, note.string, false), currChord->getHead()->notes);*/
+	currChord->notes->append(new Note(note_fret,note_string,note_rest));
       
       //reset the flags and note values
-      note.fret = 0;
-      note.string = 0;
-      note.rest = false;
+      note_fret = 0;
+      note_string = 0;
+      note_rest = false;
       chord_duration = 0;
       in_chord = false;
+      break;
+
+    case SOUND:
+      parseTagArgs(&lineXML, arg, TEMPO);
+      tempo = atoi(arg);
+      currMeasure->setTempo(tempo);
       break;
       
     case UNDEFINED:

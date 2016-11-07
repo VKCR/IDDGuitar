@@ -28,8 +28,8 @@ class TabReaderXML{
   static void parseLine(char*, LineXML*);
   
   
-  enum TagType { WORK_TITLE, CREATOR, SCORE_PART, INSTRUMENT_NAME, PART_NAME, PART, MEASURE, FRET, STRING, DURATION, REST, CHORD, END_NOTE, UNDEFINED};
-  enum TagArgs { ID, TYPE, NUMBER};
+  enum TagType { WORK_TITLE, CREATOR, SCORE_PART, INSTRUMENT_NAME, PART_NAME, PART, MEASURE, FRET, STRING, DURATION, REST, CHORD, END_NOTE, SOUND, UNDEFINED};
+  enum TagArgs { ID, TYPE, NUMBER, TEMPO};
   
  public:
   static void ReadTabXML(const char* filename, Tab* tab);
