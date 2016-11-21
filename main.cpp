@@ -68,8 +68,9 @@ int main(int argc, char** argv){
     m1 = atoi(argv[2]);
     m2 = atoi(argv[3]);
   }
-  
-  COM->Stream(tab.tracks->get("P7"), 105, 114);
+
+  COM->Stream(tab.tracks->get("P2"), 1, 5);
+  //COM->Stream(tab.tracks->get("P7"), 105, 109);
   COM->Start();
   //COM->Stop();
   COM->ReadInfinity();

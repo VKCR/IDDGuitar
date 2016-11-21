@@ -11,6 +11,11 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 //shit
 double TEMPOCOEFF = 826.0/960.0;//811.0/960.0; //a tiny bit more is required
 
+#define ON_TIME 300
+#define TOTAL_TIME 24300
+int delay_para[22] = {0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000, 21000};
+
+
 
 //messages
 enum MESSAGES {MEASURE, STOP, START, SIZE};
@@ -37,12 +42,19 @@ int laser5 = D4;
 int laser6 = D5;
 
 //laser positions
-int l1 = LOW;
-int l2 = LOW;
-int l3 = LOW;
-int l4 = LOW;
-int l5 = LOW;
-int l6 = LOW;
+int l1 = -1;
+int l2 = -1;
+int l3 = -1;
+int l4 = -1;
+int l5 = -1;
+int l6 = -1;
+
+int ll1 = -1;
+int ll2 = -1;
+int ll3 = -1;
+int ll4 = -1;
+int ll5 = -1;
+int ll6 = -1;
 
 //motor position
 double motor;
@@ -51,15 +63,22 @@ double motor;
 unsigned long startTime = 0;
 unsigned long chordDurationTime = 0;
 unsigned long nextChordDurationTime = 0;
+unsigned long start_time = micros(); 
 
 
 void updateLasers(){  
-  digitalWrite(laser1, l1);
+  l1 = ll1;
+  l2 = ll2;
+  l3 = ll3;
+  l4 = ll4;
+  l5 = ll5;
+  l6 = ll6;
+  /*digitalWrite(laser1, l1);
   digitalWrite(laser2, l2);
   digitalWrite(laser3, l3);
   digitalWrite(laser4, l4);
   digitalWrite(laser5, l5);
-  digitalWrite(laser6, l6);
+  digitalWrite(laser6, l6);*/
   /*if(l1==-1){
     digitalWrite(laser1, LOW);
     //Serial.println("Laser 1 Low");
@@ -109,12 +128,12 @@ void updateLasers(){
     //Serial.println("Laser 6 High");
   }*/
   //reset the values for the next chord
-  l1=LOW;
-  l2=LOW;
-  l3=LOW;
-  l4=LOW;
-  l5=LOW;
-  l6=LOW;
+  ll1=-1;
+  ll2=-1;
+  ll3=-1;
+  ll4=-1;
+  ll5=-1;
+  ll6=-1;
 }
 
 void setLaser(char* mbuf){
@@ -132,36 +151,36 @@ void setLaser(char* mbuf){
 
     switch(stringNum){
       case 1:
-        l1 = HIGH; //should be fretnum
+        ll1 = fretNum; //should be fretnum
         //Serial.print("l1 ");
         //Serial.println(fretNum);
         break;
       case 2:
-        l2 = HIGH;
+        ll2 = fretNum;
         
         //Serial.print("l2 ");
         //Serial.println(fretNum);
         break;
       case 3:
-        l3 = HIGH;
+        ll3 = fretNum;
         
         //Serial.print("l3 ");
         //Serial.println(fretNum);
         break;
       case 4:
-        l4 = HIGH;
+        ll4 = fretNum;
         
         //Serial.print("l4 ");
         //Serial.println(fretNum);
         break;
       case 5:
-        l5 = HIGH;
+        ll5 = fretNum;
         
         //Serial.print("l5 ");
         //Serial.println(fretNum);
         break;
       case 6:
-        l6 = HIGH;
+        ll6 = fretNum;
         
         //Serial.print("l6 ");
         //Serial.println(fretNum);
@@ -211,7 +230,47 @@ int readMeasure(char*mbuf, int note){
   }
   else
   {
-    //do nothing
+    //turn on
+    if(l1 != -1 &&  (micros() - start_time) % TOTAL_TIME >= delay_para[l1] && (micros() - start_time) % TOTAL_TIME < delay_para[l1] + ON_TIME) {
+      if((micros() - start_time) % TOTAL_TIME >= delay_para[l1]){ digitalWrite(laser1, HIGH); // double check to reduce thorns
+      }
+    }
+  if(l2 != -1 && (micros() - start_time) % TOTAL_TIME >= delay_para[l2] && (micros() - start_time) % TOTAL_TIME < delay_para[l2] + ON_TIME) {
+    if((micros() - start_time) % TOTAL_TIME >= delay_para[l2]) digitalWrite(laser2, HIGH);
+  }
+  if(l3 != -1 && (micros() - start_time) % TOTAL_TIME >= delay_para[l3] && (micros() - start_time) % TOTAL_TIME < delay_para[l3] + ON_TIME) {
+    if((micros() - start_time) % TOTAL_TIME >= delay_para[l3]) digitalWrite(laser3, HIGH);
+  }
+  if(l4 != -1 && (micros() - start_time) % TOTAL_TIME >= delay_para[l4] && (micros() - start_time) % TOTAL_TIME < delay_para[l4] + ON_TIME) {
+    
+    if((micros() - start_time) % TOTAL_TIME >= delay_para[l4]) digitalWrite(laser4, HIGH);
+  }
+  if(l5 != -1 && (micros() - start_time) % TOTAL_TIME >= delay_para[l5] && (micros() - start_time) % TOTAL_TIME < delay_para[l5] + ON_TIME) {
+    if((micros() - start_time) % TOTAL_TIME >= delay_para[l5]) digitalWrite(laser5, HIGH);
+  }
+  if(l6 != -1 && (micros() - start_time) % TOTAL_TIME >= delay_para[l6] && (micros() - start_time) % TOTAL_TIME < delay_para[l6] + ON_TIME) {
+    if((micros() - start_time) % TOTAL_TIME >= delay_para[l6]) digitalWrite(laser6, HIGH);
+  }
+  
+  //turn off
+  if(l1 != -1 && (micros() - start_time) % TOTAL_TIME >= delay_para[l1] + ON_TIME) {
+    digitalWrite(laser1, LOW);
+  }
+  if(l2 != -1 && (micros() - start_time) % TOTAL_TIME >= delay_para[l2] + ON_TIME) {
+    digitalWrite(laser2, LOW);
+  }
+  if(l3 != -1 && (micros() - start_time) % TOTAL_TIME >= delay_para[l3] + ON_TIME) {
+    digitalWrite(laser3, LOW);
+  }
+  if(l4 != -1 && (micros() - start_time) % TOTAL_TIME >= delay_para[l4] + ON_TIME) {
+    digitalWrite(laser4, LOW);
+  }
+  if(l5 != -1 && (micros() - start_time) % TOTAL_TIME >= delay_para[l5] + ON_TIME) {
+    digitalWrite(laser5, LOW);
+  }
+  if(l6 != -1 && (micros() - start_time) % TOTAL_TIME >= delay_para[l6] + ON_TIME) {
+    digitalWrite(laser6, LOW);
+  }
   }
   return note;
 }
@@ -315,7 +374,7 @@ void loop() {
   
   if(Serial.available() > 0){
     String str = Serial.readString();
-    Serial.println("ACKs"); //the ACK
+    Serial.println("ACKqsz"); //the ACK
     dispatchStr(str);
   }
 
@@ -327,12 +386,12 @@ void loop() {
         free(MeasureBuffer);
         //make it more robust so that I can play a song again
         sizeMeasure = 0;
-        l1=LOW;
-        l2=LOW;
-        l3=LOW;
-        l4=LOW;
-        l5=LOW;
-        l6=LOW;
+        ll1=-1;
+        ll2=-1;
+        ll3=-1;
+        ll4=-1;
+        ll5=-1;
+        ll6=-1;
         updateLasers();
         measurePointer = 0;
         currMeasure = 0;
