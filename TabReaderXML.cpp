@@ -96,7 +96,7 @@ void TabReaderXML::parseTagArgs(LineXML* lineXML, char* arg_buff, int type_arg){
 
   return;
  
-  //HERE I NEED TO FINISH IN CASE THERE ARE OTHER ARGS
+  //ADD CASE WHERE THERE ARE EXTRA ARGS
   
 }
 

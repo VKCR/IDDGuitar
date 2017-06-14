@@ -1,8 +1,5 @@
 //Tab reader module for the project
-//methods which read the tab from an xml file and create a Tab object, which contains the required information of the song
 
-//we need to read the file, parse it, and fill in the Tab data structure
-//tu
 #ifndef TABREADERXML_H
 #define TABREADERXML_H
 #include <iostream>

@@ -23,7 +23,6 @@ int main(int argc, char** argv){
   tab.tracks->print();
   tab.tracks->get("P2")->measures->print();
 
-  //tab.tracks->getTail()->getHead()->measures->print();
   com_interface* COM;
   char buff[100000];
   COM = new com_interface();
