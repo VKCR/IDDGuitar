@@ -41,7 +41,7 @@ void com_interface_serial::publish(const char* s){
     int size = strlen(s);
     int index = 0;
     char sendbuf[10001];
-    while (size != 0){ //check that this works lol
+    while (size != 0){ 
       memcpy(sendbuf, &s[index*10000], (10000 < size ? 10000 : size));
       10000 < size ? sendbuf[10000] = 0 : sendbuf[size] = 0;
       

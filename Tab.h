@@ -14,6 +14,10 @@ template <class T> class LinkedList
   LinkedList<T>* tail;
  public:
   LinkedList(T*,LinkedList<T>*);
+  ~LinkedList(){
+    delete head;
+    delete tail;
+  }
   T* getHead() { return head;}
   T* getLast() {
     LinkedList<T>* t = this;
@@ -103,6 +107,9 @@ class Chord
  public:
   LinkedList<Note>* notes;
   Chord(int);
+  ~Chord(){
+    delete notes;
+  }
   void print(){
     LinkedList<Note>* t = notes;
     cout<<"Chord "<< duration<<" : "<<endl;
@@ -120,6 +127,9 @@ class Measure{
   int tempo;
  public:
   Measure(int);
+  ~Measure(){
+    delete chords;
+  }
   LinkedList<Chord>* chords;
   void print(){
     LinkedList<Chord>* t = chords;
@@ -137,15 +147,18 @@ class Measure{
 
 class Track{
  private:
-  char* id;
-  char* instrument_name;
-  char* part_name;
+  char id[100];
+  char instrument_name[100];
+  char part_name[100];
   
  public:
   //list of measures
   LinkedList<Measure>* measures;
   
   Track(char*);
+  ~Track(){
+    delete measures;
+  }
   void setInstrumentName(char*);
   void setPartName(char*);
   char* getID(){return id;}
@@ -159,15 +172,17 @@ class Track{
 
 class Tab{
  private:
-  char* work_title;
-  char* creator;
+  char work_title[100];
+  char creator[100];
   
  public:
-  //TrackList* tracks;
   LinkedList<Track>* tracks;
   void setWorkTitle(char*);
   void setCreator(char*);
   Tab();
+  ~Tab(){
+    delete tracks;
+  }
 };
 
 #endif

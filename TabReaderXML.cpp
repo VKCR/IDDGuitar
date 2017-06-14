@@ -132,9 +132,11 @@ void TabReaderXML::ReadTabXML(const char* filename, Tab* tab)
     case WORK_TITLE:
       tab->setWorkTitle(lineXML.center);
       break;
+      
     case CREATOR:
       tab->setCreator(lineXML.center);
       break;
+      
     case SCORE_PART:
       parseTagArgs(&lineXML, arg, ID);
       if(tab->tracks == NULL)
@@ -142,9 +144,11 @@ void TabReaderXML::ReadTabXML(const char* filename, Tab* tab)
       else
 	tab->tracks->append(new Track(arg));
       break;
+      
     case INSTRUMENT_NAME:
       tab->tracks->getLast()->setInstrumentName(lineXML.center);
       break;
+      
     case PART_NAME:
       tab->tracks->getLast()->setPartName(lineXML.center);
       break;
@@ -219,7 +223,7 @@ void TabReaderXML::ReadTabXML(const char* filename, Tab* tab)
       }
       
   }
-  
+  fclose(file);
   return;
 }
 

@@ -65,7 +65,7 @@ void com_interface::Track2String(Track* track, char* b){
   }
   trackstring+="}";
   strcpy(b, trackstring.c_str());
-  cout<<b<<endl;
+  //cout<<b<<endl;
 }
 
 void com_interface::Measure2String(Measure* m, char*b){
@@ -113,6 +113,6 @@ void com_interface::Measure2String(Measure* m, char*b){
   }
   trackstring+="}";
   strcpy(b, trackstring.c_str());
-  cout<<b<<endl;
+  //cout<<b<<endl;
 }
 
